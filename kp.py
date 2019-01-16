@@ -1,6 +1,7 @@
 import requests
 import time
 from phue import Bridge
+from random import randint
 
 starttime=time.time()
 red = 0
@@ -9,20 +10,23 @@ yellow = 12750
 orange  = 5000
 _sleep = 60 * 3		# period of time for code to 'sleep' pre-API calling [min]
 flash_seq = 3		# number of times Kp alert flashes
-
+mean = 10
 def present():
 	b = Bridge('10.0.0.11','wA09J7Tlvu6myCfifgM5BsF6cuaw0SQOLFnAwoux')
 	b.connect()
 	b.get_api()
 	color = None
-	r=requests.get('https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DatabaseDataStreamServlet?format=JSON&resource=NOAA-KP&quantity=KP&duration=1')
-	entries = r.json()[-26:]
-	x = 0
-	y = 0
-	for i in entries:
-		x+=float(i['KP'])
-		y+=1
-	mean = x/y
+	try:
+		r=requests.get('https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DatabaseDataStreamServlet?format=JSON&resource=NOAA-KP&quantity=KP&duration=1')
+		entries = r.json()[-26:]
+		x = 0
+		y = 0
+		for i in entries:
+			x+=float(i['KP'])
+			y+=1
+		mean = x/y
+	except:
+		mean = randint(0,6)
 	if(mean < 2):
 		color=green
 	elif(mean >= 2 and mean < 3):
